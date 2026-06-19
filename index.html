@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ListenUp — English Learning</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ══════════ AUTH SCREEN ══════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo"><span>🎧</span><h1>ListenUp</h1></div>
+    <p class="auth-tagline">Học tiếng Anh hiệu quả mỗi ngày</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="showAuthForm('login')">Đăng nhập</button>
+      <button class="auth-tab" id="tab-register" onclick="showAuthForm('register')">Đăng ký</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login" class="auth-form">
+      <div class="field-group">
+        <label>Tên đăng nhập</label>
+        <input type="text" id="login-user" class="auth-input" placeholder="username" autocomplete="username"/>
+      </div>
+      <div class="field-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="login-pass" class="auth-input" placeholder="••••••••" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div id="login-error" class="auth-error hidden"></div>
+      <button class="btn-auth" onclick="doLogin()">Đăng nhập</button>
+      <button class="btn-forgot" onclick="showAuthForm('forgot')">Quên mật khẩu?</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" class="auth-form hidden">
+      <div class="field-group">
+        <label>Tên đăng nhập</label>
+        <input type="text" id="reg-user" class="auth-input" placeholder="username (không dấu, không cách)"/>
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" class="auth-input" placeholder="email@example.com"/>
+      </div>
+      <div class="field-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="reg-pass" class="auth-input" placeholder="Ít nhất 6 ký tự"/>
+      </div>
+      <div class="field-group">
+        <label>Xác nhận mật khẩu</label>
+        <input type="password" id="reg-pass2" class="auth-input" placeholder="Nhập lại mật khẩu"
+          onkeydown="if(event.key==='Enter')doRegister()"/>
+      </div>
+      <div id="reg-error" class="auth-error hidden"></div>
+      <button class="btn-auth" onclick="doRegister()">Tạo tài khoản</button>
+    </div>
+
+    <!-- FORGOT -->
+    <div id="form-forgot" class="auth-form hidden">
+      <p class="forgot-desc">Nhập email đã đăng ký. Chúng tôi sẽ gửi mã đặt lại mật khẩu.</p>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="forgot-email" class="auth-input" placeholder="email@example.com"/>
+      </div>
+      <div id="forgot-msg" class="auth-success hidden"></div>
+      <div id="forgot-error" class="auth-error hidden"></div>
+      <button class="btn-auth" onclick="doForgot()">Gửi mã đặt lại</button>
+
+      <!-- Reset code form (shown after sending) -->
+      <div id="reset-form" class="hidden" style="margin-top:16px">
+        <div class="field-group">
+          <label>Mã xác nhận (6 chữ số)</label>
+          <input type="text" id="reset-code" class="auth-input" placeholder="123456" maxlength="6"/>
+        </div>
+        <div class="field-group">
+          <label>Mật khẩu mới</label>
+          <input type="password" id="reset-newpass" class="auth-input" placeholder="Ít nhất 6 ký tự"/>
+        </div>
+        <button class="btn-auth" onclick="doReset()">Đặt lại mật khẩu</button>
+      </div>
+
+      <button class="btn-forgot" onclick="showAuthForm('login')">← Quay lại đăng nhập</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN APP ══════════ -->
+<div id="app" class="hidden">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo"><span class="logo-icon">🎧</span><span class="logo-text">ListenUp</span></div>
+      <nav class="tabs" id="main-tabs">
+        <button class="tab active" data-tab="practice"  onclick="switchTab('practice')">🎧 Nghe</button>
+        <button class="tab" data-tab="review"           onclick="switchTab('review')">🔀 Review</button>
+        <button class="tab" data-tab="flashcard"        onclick="switchTab('flashcard')">🃏 Flashcard</button>
+        <button class="tab" data-tab="speaking"         onclick="switchTab('speaking')">🎤 Speaking</button>
+        <button class="tab" data-tab="create"           onclick="switchTab('create')">✏️ Tạo bài</button>
+        <button class="tab" data-tab="progress"         onclick="switchTab('progress')">📊 Tiến độ</button>
+      </nav>
+      <div class="header-user">
+        <span id="header-username" class="username-badge"></span>
+        <button class="btn-logout" onclick="doLogout()" title="Đăng xuất">⏏</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ TAB: PRACTICE (LISTENING) ═══ -->
+  <main id="tab-practice" class="tab-content active">
+    <div class="container">
+      <div id="no-lesson" class="empty-state">
+        <div class="empty-icon">📚</div><h2>Chưa có bài luyện nghe</h2>
+        <p>Tạo bài mới ở tab <strong>Tạo bài</strong>!</p>
+        <button class="btn-primary" onclick="switchTab('create')">Tạo bài học ngay</button>
+      </div>
+      <div id="lesson-list-section" class="hidden">
+        <div class="section-header"><h2>Chọn bài luyện nghe</h2></div>
+        <div id="lesson-cards" class="lesson-cards"></div>
+      </div>
+      <div id="lesson-player" class="hidden">
+        <div class="player-header">
+          <button class="btn-back" onclick="backToList('practice')">← Danh sách</button>
+          <div class="lesson-title-bar"><span id="player-lesson-title"></span><span id="player-progress" class="progress-badge"></span></div>
+        </div>
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+        <div class="sentence-card">
+          <div class="sentence-number" id="sentence-number">Câu 1</div>
+          <div class="audio-controls">
+            <button class="btn-play" id="btn-play" onclick="playCurrent()">▶ Nghe</button>
+            <button class="btn-play btn-slow" onclick="playCurrentSlow()">🐢 Chậm</button>
+            <button class="btn-icon" id="btn-repeat" onclick="toggleRepeat()">🔁</button>
+          </div>
+          <div class="answer-area">
+            <label class="answer-label">Nhập những gì bạn nghe được:</label>
+            <textarea id="answer-input" class="answer-input" placeholder="Gõ câu tiếng Anh bạn vừa nghe..." rows="3" onkeydown="handleKey(event)"></textarea>
+            <div class="answer-actions">
+              <button class="btn-hint" onclick="showHint()">💡 Gợi ý</button>
+              <button class="btn-check" onclick="checkAnswer()">Kiểm tra ✓</button>
+            </div>
+          </div>
+          <div id="feedback" class="feedback hidden"></div>
+          <div class="nav-buttons">
+            <button class="btn-nav" onclick="prevSentence()" id="btn-prev">← Trước</button>
+            <button class="btn-nav btn-next" onclick="nextSentence()" id="btn-next">Tiếp →</button>
+          </div>
+        </div>
+        <div class="score-panel">
+          <div class="score-item"><span class="score-icon">✅</span><span id="score-correct">0</span><span class="score-label">Đúng</span></div>
+          <div class="score-item"><span class="score-icon">❌</span><span id="score-wrong">0</span><span class="score-label">Sai</span></div>
+          <div class="score-item"><span class="score-icon">⏭</span><span id="score-skipped">0</span><span class="score-label">Bỏ qua</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ TAB: REVIEW (WORD ARRANGEMENT) ═══ -->
+  <main id="tab-review" class="tab-content hidden">
+    <div class="container">
+      <div id="rv-no-lesson" class="empty-state">
+        <div class="empty-icon">🔀</div><h2>Chưa có bài review</h2>
+        <p>Tạo bài review ở tab <strong>Tạo bài</strong>!</p>
+        <button class="btn-primary" onclick="switchTab('create')">Tạo bài review ngay</button>
+      </div>
+      <div id="rv-list" class="hidden">
+        <div class="section-header"><h2>Chọn bài Review</h2></div>
+        <div id="rv-lesson-cards" class="lesson-cards"></div>
+      </div>
+      <div id="rv-player" class="hidden">
+        <div class="player-header">
+          <button class="btn-back" onclick="backToList('review')">← Danh sách</button>
+          <div class="lesson-title-bar"><span id="rv-lesson-title"></span><span id="rv-progress-badge" class="progress-badge"></span></div>
+        </div>
+        <div class="progress-track"><div id="rv-progress-fill" class="progress-fill"></div></div>
+        <div class="sentence-card">
+          <div class="sentence-number" id="rv-q-num">Câu 1</div>
+          <div class="rv-vietnamese" id="rv-vietnamese"></div>
+          <div class="rv-hint-text">Sắp xếp các từ thành câu tiếng Anh đúng:</div>
+          <!-- Answer slots -->
+          <div class="rv-answer-slots" id="rv-answer-slots"></div>
+          <!-- Word bank -->
+          <div class="rv-word-bank" id="rv-word-bank"></div>
+          <div id="rv-feedback" class="feedback hidden"></div>
+          <div class="answer-actions" style="margin-top:12px;justify-content:space-between">
+            <button class="btn-hint" onclick="rvClear()">🗑 Xoá tất cả</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn-hint" onclick="rvHint()">💡 Gợi ý</button>
+              <button class="btn-check" onclick="rvCheck()">Kiểm tra ✓</button>
+            </div>
+          </div>
+        </div>
+        <div class="score-panel">
+          <div class="score-item"><span class="score-icon">✅</span><span id="rv-correct">0</span><span class="score-label">Đúng</span></div>
+          <div class="score-item"><span class="score-icon">❌</span><span id="rv-wrong">0</span><span class="score-label">Sai</span></div>
+          <div class="score-item"><span class="score-icon">⏭</span><span id="rv-skipped">0</span><span class="score-label">Bỏ qua</span></div>
+        </div>
+        <div class="nav-buttons" style="margin-top:12px">
+          <button class="btn-nav" onclick="rvPrev()" id="rv-btn-prev">← Trước</button>
+          <button class="btn-nav btn-next" onclick="rvNext()" id="rv-btn-next">Tiếp →</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ TAB: FLASHCARD ═══ -->
+  <main id="tab-flashcard" class="tab-content hidden">
+    <div class="container">
+      <div id="fc-no-deck" class="empty-state">
+        <div class="empty-icon">🃏</div><h2>Chưa có bộ thẻ</h2>
+        <p>Tạo bộ flashcard ở tab <strong>Tạo bài</strong>!</p>
+        <button class="btn-primary" onclick="switchTab('create')">Tạo flashcard ngay</button>
+      </div>
+      <div id="fc-deck-list" class="hidden">
+        <div class="section-header"><h2>Chọn bộ Flashcard</h2></div>
+        <div id="fc-deck-cards" class="lesson-cards"></div>
+      </div>
+      <div id="fc-study" class="hidden">
+        <div class="player-header">
+          <button class="btn-back" onclick="backToList('flashcard')">← Danh sách</button>
+          <div class="lesson-title-bar"><span id="fc-deck-title"></span><span id="fc-progress-badge" class="progress-badge"></span></div>
+        </div>
+        <div class="progress-track"><div id="fc-progress-fill" class="progress-fill"></div></div>
+        <div class="fc-mode-bar">
+          <button class="fc-mode-btn active" id="mode-flip" onclick="setFCMode('flip')">🔄 Lật thẻ</button>
+          <button class="fc-mode-btn" id="mode-quiz" onclick="setFCMode('quiz')">📝 Trắc nghiệm</button>
+          <button class="fc-mode-btn" id="mode-type" onclick="setFCMode('type')">⌨️ Nhập từ</button>
+        </div>
+        <!-- FLIP -->
+        <div id="fc-flip-mode">
+          <div class="flashcard-wrap" onclick="flipCard()">
+            <div class="flashcard" id="fc-card">
+              <div class="fc-front"><div class="fc-word" id="fc-word"></div><div class="fc-pos" id="fc-pos"></div></div>
+              <div class="fc-back"><div class="fc-meaning" id="fc-meaning"></div><div class="fc-example" id="fc-example"></div></div>
+            </div>
+          </div>
+          <p class="fc-tap-hint">👆 Nhấn vào thẻ để xem nghĩa</p>
+          <div class="fc-flip-actions hidden" id="fc-flip-actions">
+            <button class="btn-fc-wrong" onclick="fcRate(false)">😕 Chưa nhớ</button>
+            <button class="btn-fc-correct" onclick="fcRate(true)">😊 Đã nhớ</button>
+          </div>
+        </div>
+        <!-- QUIZ -->
+        <div id="fc-quiz-mode" class="hidden">
+          <div class="quiz-card">
+            <div class="quiz-question" id="quiz-question"></div>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div id="quiz-feedback" class="feedback hidden"></div>
+            <button class="btn-nav btn-next" style="width:100%;margin-top:12px;display:none" onclick="nextQuizQ()" id="btn-quiz-next">Tiếp →</button>
+          </div>
+        </div>
+        <!-- TYPE -->
+        <div id="fc-type-mode" class="hidden">
+          <div class="sentence-card">
+            <div class="fc-type-meaning" id="fc-type-meaning"></div>
+            <div class="fc-type-pos" id="fc-type-pos"></div>
+            <div class="answer-area" style="margin-top:16px">
+              <label class="answer-label">Nhập từ tiếng Anh:</label>
+              <input type="text" id="fc-type-input" class="answer-input" style="padding:12px 14px" placeholder="Type the English word..." onkeydown="if(event.key==='Enter')fcTypeCheck()"/>
+              <div class="answer-actions" style="margin-top:10px">
+                <button class="btn-hint" onclick="fcTypeHint()">💡 Gợi ý</button>
+                <button class="btn-check" onclick="fcTypeCheck()">Kiểm tra ✓</button>
+              </div>
+            </div>
+            <div id="fc-type-feedback" class="feedback hidden"></div>
+            <div class="nav-buttons" style="margin-top:14px">
+              <button class="btn-nav" onclick="fcTypePrev()">← Trước</button>
+              <button class="btn-nav btn-next" onclick="fcTypeNext()" id="btn-type-next">Tiếp →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ TAB: SPEAKING ═══ -->
+  <main id="tab-speaking" class="tab-content hidden">
+    <div class="container">
+      <div id="sp-no-deck" class="empty-state">
+        <div class="empty-icon">🎤</div><h2>Chưa có bộ từ</h2>
+        <p>Tạo bộ flashcard để luyện speaking!</p>
+        <button class="btn-primary" onclick="switchTab('create')">Tạo flashcard ngay</button>
+      </div>
+      <div id="sp-deck-list" class="hidden">
+        <div class="section-header"><h2>Chọn bộ từ để luyện phát âm</h2></div>
+        <div id="sp-deck-cards" class="lesson-cards"></div>
+      </div>
+      <div id="sp-practice" class="hidden">
+        <div class="player-header">
+          <button class="btn-back" onclick="backToList('speaking')">← Danh sách</button>
+          <div class="lesson-title-bar"><span id="sp-deck-title"></span><span id="sp-progress-badge" class="progress-badge"></span></div>
+        </div>
+        <div class="progress-track"><div id="sp-progress-fill" class="progress-fill"></div></div>
+        <div class="sentence-card">
+          <div class="sentence-number" id="sp-word-num">Từ 1</div>
+          <div class="sp-word-display">
+            <div class="sp-target-word" id="sp-target-word"></div>
+            <div class="sp-pos-badge" id="sp-pos-badge"></div>
+            <div class="sp-meaning-text" id="sp-meaning-text"></div>
+          </div>
+          <div class="audio-controls" style="margin-bottom:16px;justify-content:center">
+            <button class="btn-play" onclick="spPlayReference()">▶ Nghe mẫu</button>
+            <button class="btn-play btn-slow" onclick="spPlayReferenceSlow()">🐢 Chậm</button>
+          </div>
+          <div class="sp-record-area">
+            <button class="btn-record" id="btn-record" onclick="spToggleRecord()">
+              <span class="record-icon">🎤</span><span id="record-label">Nhấn để nói</span>
+            </button>
+            <div class="sp-wave" id="sp-wave"><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <div id="sp-result" class="sp-result hidden">
+            <div class="sp-score-ring-wrap">
+              <svg class="sp-score-ring" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                <circle id="sp-ring-circle" cx="40" cy="40" r="34" fill="none" stroke="#58cc02" stroke-width="8" stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6" transform="rotate(-90 40 40)"/>
+              </svg>
+              <div class="sp-score-text"><span id="sp-score-pct">0%</span><span id="sp-score-label" class="sp-score-label">--</span></div>
+            </div>
+            <div class="sp-phoneme-result" id="sp-phoneme-result"></div>
+            <div class="sp-feedback-text" id="sp-feedback-text"></div>
+          </div>
+          <div class="nav-buttons" style="margin-top:16px">
+            <button class="btn-nav" onclick="spPrev()" id="sp-btn-prev">← Trước</button>
+            <button class="btn-nav btn-next" onclick="spNext()" id="sp-btn-next">Tiếp →</button>
+          </div>
+        </div>
+        <div class="score-panel">
+          <div class="score-item"><span class="score-icon">🏆</span><span id="sp-score-great">0</span><span class="score-label">Đạt</span></div>
+          <div class="score-item"><span class="score-icon">🟡</span><span id="sp-score-ok">0</span><span class="score-label">Gần đạt</span></div>
+          <div class="score-item"><span class="score-icon">🔴</span><span id="sp-score-bad">0</span><span class="score-label">Chưa đạt</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ TAB: CREATE ═══ -->
+  <main id="tab-create" class="tab-content hidden">
+    <div class="container">
+      <div class="subtab-bar">
+        <button class="subtab active" id="sub-listening" onclick="switchSubtab('listening')">🎧 Luyện nghe</button>
+        <button class="subtab" id="sub-flashcard"        onclick="switchSubtab('flashcard')">🃏 Flashcard</button>
+        <button class="subtab" id="sub-review"           onclick="switchSubtab('review')">🔀 Review</button>
+      </div>
+
+      <!-- CREATE LISTENING -->
+      <div id="create-listening" class="create-panel">
+        <h2 class="create-title">Tạo bài luyện nghe</h2>
+        <div class="form-group">
+          <label>Tên bài học</label>
+          <input type="text" id="lesson-name" class="input-field" placeholder="VD: IELTS Listening Unit 1"/>
+        </div>
+        <div class="form-group">
+          <label>Câu tiếng Anh <span class="label-note">(mỗi ô một câu)</span></label>
+          <div id="listen-sentences-list" class="dynamic-list"></div>
+          <button class="btn-add-item" onclick="addListenSentence()">+ Thêm câu</button>
+        </div>
+        <div class="create-actions"><button class="btn-primary" onclick="createLesson()">💾 Lưu bài học</button></div>
+        <div class="saved-lessons"><h3>Bài đã lưu</h3><div id="saved-lesson-list"></div></div>
+      </div>
+
+      <!-- CREATE FLASHCARD -->
+      <div id="create-flashcard" class="create-panel hidden">
+        <h2 class="create-title">Tạo bộ Flashcard</h2>
+        <div class="form-group">
+          <label>Tên bộ thẻ</label>
+          <input type="text" id="deck-name" class="input-field" placeholder="VD: IELTS Vocabulary Unit 1"/>
+        </div>
+        <div class="form-group">
+          <label>Từ vựng <span class="label-note">(mỗi dòng một từ)</span></label>
+          <div id="vocab-list" class="dynamic-list"></div>
+          <button class="btn-add-item" onclick="addVocabRow()">+ Thêm từ</button>
+        </div>
+        <div class="create-actions"><button class="btn-primary" onclick="createDeck()">💾 Lưu bộ thẻ</button></div>
+        <div class="saved-lessons"><h3>Bộ thẻ đã lưu</h3><div id="saved-deck-list"></div></div>
+      </div>
+
+      <!-- CREATE REVIEW -->
+      <div id="create-review" class="create-panel hidden">
+        <h2 class="create-title">Tạo bài Review</h2>
+        <div class="form-group">
+          <label>Tên bài review</label>
+          <input type="text" id="review-name" class="input-field" placeholder="VD: Unit 1 – Review câu"/>
+        </div>
+        <div class="form-group">
+          <label>Câu hỏi <span class="label-note">(tiếng Việt → tiếng Anh)</span></label>
+          <div id="review-pairs-list" class="dynamic-list"></div>
+          <button class="btn-add-item" onclick="addReviewPair()">+ Thêm câu</button>
+        </div>
+        <div class="create-actions"><button class="btn-primary" onclick="createReview()">💾 Lưu bài review</button></div>
+        <div class="saved-lessons"><h3>Bài review đã lưu</h3><div id="saved-review-list"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══ TAB: PROGRESS ═══ -->
+  <main id="tab-progress" class="tab-content hidden">
+    <div class="container">
+      <h2 class="section-title">📊 Tiến độ học tập</h2>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="streak-card" id="streak-card"></div>
+
+      <!-- Weak items section -->
+      <div id="weak-section" class="weak-section hidden">
+        <div class="weak-header">
+          <span class="weak-icon">⚠️</span>
+          <h3>Cần ôn lại</h3>
+          <span class="weak-count" id="weak-count">0 mục</span>
+        </div>
+        <p class="weak-desc">Nhấn vào từng mục để luyện lại đến khi đạt!</p>
+        <div id="weak-items" class="weak-items"></div>
+      </div>
+
+      <div class="progress-section">
+        <div class="ps-header"><span class="ps-icon">🎧</span><h3>Luyện nghe</h3></div>
+        <div id="ps-listening-list" class="ps-list"></div>
+      </div>
+      <div class="progress-section">
+        <div class="ps-header"><span class="ps-icon">🔀</span><h3>Review</h3></div>
+        <div id="ps-review-list" class="ps-list"></div>
+      </div>
+      <div class="progress-section">
+        <div class="ps-header"><span class="ps-icon">🃏</span><h3>Flashcard</h3></div>
+        <div id="ps-flashcard-list" class="ps-list"></div>
+      </div>
+      <div class="progress-section">
+        <div class="ps-header"><span class="ps-icon">🎤</span><h3>Speaking</h3></div>
+        <div id="ps-speaking-list" class="ps-list"></div>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn-secondary" onclick="if(confirm('Xoá toàn bộ tiến độ?'))resetAllProgress()">🗑 Xoá tiến độ</button>
+      </div>
+    </div>
+  </main>
+
+</div><!-- #app -->
+
+<!-- COMPLETION MODAL -->
+<div id="completion-modal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon">🎉</div>
+    <h2 id="modal-title">Hoàn thành!</h2>
+    <div id="final-score" class="final-score"></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="modalRestart()">🔄 Làm lại</button>
+      <button class="btn-secondary" id="modal-back-btn">📚 Bài khác</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEAK ITEM PRACTICE MODAL -->
+<div id="weak-modal" class="modal hidden">
+  <div class="modal-box" style="max-width:460px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 id="weak-modal-title" style="font-size:16px;font-weight:800">Ôn lại</h3>
+      <button onclick="closeWeakModal()" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <div id="weak-modal-body"></div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
