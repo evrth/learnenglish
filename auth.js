@@ -48,45 +48,19 @@ async function dbGet(username, key, def) {
   }
 }
 async function dbSet(username, key, value) {
-  var body = JSON.stringify({ username: username, key: key, value: value, updated_at: new Date().toISOString() });
-  var baseHeaders = {
-    'apikey': SUPABASE_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_KEY,
-    'Content-Type': 'application/json'
-  };
-
-  // Thử UPDATE trước (PATCH) — nếu row đã tồn tại
-  var patchRes = await fetch(
-    SUPABASE_URL + '/rest/v1/user_data?username=eq.' + encodeURIComponent(username) + '&key=eq.' + encodeURIComponent(key),
-    { method: 'PATCH', headers: Object.assign({}, baseHeaders, {'Prefer':'return=minimal'}),
-      body: JSON.stringify({ value: value, updated_at: new Date().toISOString() }) }
-  );
-
-  if (patchRes.ok) {
-    // Kiểm tra có update được row nào không (header Content-Range)
-    var count = patchRes.headers.get('content-range');
-    // Nếu PATCH không tìm thấy row (0 rows), thì INSERT
-    if (count && count.startsWith('*/0')) {
-      var insertRes = await fetch(
-        SUPABASE_URL + '/rest/v1/user_data',
-        { method: 'POST', headers: Object.assign({}, baseHeaders, {'Prefer':'return=minimal'}), body: body }
-      );
-      if (!insertRes.ok) {
-        var err2 = await insertRes.text();
-        throw new Error('INSERT error ' + insertRes.status + ': ' + err2);
-      }
-    }
-    return;
-  }
-
-  // Nếu PATCH lỗi, thử INSERT
-  var insertRes = await fetch(
-    SUPABASE_URL + '/rest/v1/user_data',
-    { method: 'POST', headers: Object.assign({}, baseHeaders, {'Prefer':'return=minimal'}), body: body }
-  );
-  if (!insertRes.ok) {
-    var err3 = await insertRes.text();
-    throw new Error('INSERT error ' + insertRes.status + ': ' + err3);
+  // Gọi Supabase RPC function upsert_user_data - tránh lỗi 409 duplicate key
+  var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/upsert_user_data', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ p_username: username, p_key: key, p_value: value })
+  });
+  if (!res.ok) {
+    var err = await res.text();
+    throw new Error('dbSet RPC error ' + res.status + ': ' + err);
   }
 }
 
