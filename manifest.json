@@ -1,0 +1,26 @@
+{
+  "name": "ListenUp - Học Tiếng Anh",
+  "short_name": "ListenUp",
+  "description": "Học tiếng Anh hiệu quả mỗi ngày",
+  "start_url": "/learnenglish/",
+  "scope": "/learnenglish/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#58cc02",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
