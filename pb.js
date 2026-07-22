@@ -1,7 +1,7 @@
 // ==========================================
 // pb.js - ListenUp PocketBase
 // ==========================================
-
+console.log("pb.js bắt đầu chạy");
 // Địa chỉ PocketBase
 const pb = new PocketBase("http://127.0.0.1:8090");
 
@@ -155,3 +155,4 @@ async function dbGet(username, key, defaultValue) {
     }
 
 }
+console.log("pb.js chạy xong");
