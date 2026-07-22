@@ -235,7 +235,6 @@ async function bootApp() {
   var ldEl = document.getElementById('app-loading');
   if (ldEl) ldEl.remove();
   renderAll();
-  initCreateForms();
 }
 
 // ─── LOAD / SAVE ──────────────────────────────
