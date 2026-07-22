@@ -3,7 +3,7 @@
 // ==========================================
 console.log("pb.js bắt đầu chạy");
 // Địa chỉ PocketBase
-const pb = new PocketBase("http://127.0.0.1:8090");
+const pb = new PocketBase("https://pocketbase-production-29d1.up.railway.app");
 
 
 // =============================
@@ -155,4 +155,4 @@ async function dbGet(username, key, defaultValue) {
     }
 
 }
-console.log("pb.js chạy xong");
+console.log("PocketBase:", pb);
