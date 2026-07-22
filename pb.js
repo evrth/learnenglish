@@ -35,3 +35,51 @@ async function pbPing() {
 const USERS = "users";
 
 const USER_DATA = "user_data";
+// =============================
+// Lấy user theo username
+// =============================
+async function dbGetAccount(username) {
+
+    const list = await pb.collection(USERS).getFullList({
+
+        filter: `username="${username}"`
+
+    });
+
+    if (list.length === 0) return null;
+
+    return list[0];
+
+}
+// =============================
+// Lấy user theo email
+// =============================
+async function dbGetAccountByEmail(email) {
+
+    const list = await pb.collection(USERS).getFullList({
+
+        filter: `email="${email}"`
+
+    });
+
+    if (list.length === 0) return null;
+
+    return list[0];
+
+}
+// =============================
+// Tạo tài khoản mới
+// =============================
+async function dbSaveAccount(username, passHash, email) {
+
+    return await pb.collection(USERS).create({
+
+        username: username,
+
+        password: passHash,
+
+        email: email
+
+    });
+
+}
