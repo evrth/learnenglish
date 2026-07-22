@@ -1,68 +1,6 @@
 // =============================================
-//  auth.js — ListenUp với Supabase
+//  auth.js — ListenUp
 // =============================================
-const SUPABASE_URL = 'https://qhommnmcwzrmwzqkjdzh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFob21tbm1jd3pybXd6cWtqZHpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzI3MTAsImV4cCI6MjA5NzQwODcxMH0.jtKyC7bm9RyqMOhLTOpSvQqGAon7OMU-ciUrJjIOjjs';
-
-// ─── Supabase fetch helper ────────────────────
-async function sbFetch(path, method, body) {
-  method = method || 'GET';
-  var headers = {
-    'apikey': SUPABASE_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_KEY,
-    'Content-Type': 'application/json'
-  };
-  if (method === 'POST')  headers['Prefer'] = 'resolution=merge-duplicates,return=minimal';
-  if (method === 'PATCH') headers['Prefer'] = 'return=minimal';
-  var opts = { method: method, headers: headers };
-  if (body) opts.body = JSON.stringify(body);
-  var res = await fetch(SUPABASE_URL + '/rest/v1/' + path, opts);
-  if (!res.ok) {
-    var err = await res.text();
-    throw new Error('Supabase ' + res.status + ': ' + err);
-  }
-  var text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
-// ─── DB helpers ───────────────────────────────
-async function dbGetAccount(username) {
-  var rows = await sbFetch('accounts?username=eq.' + encodeURIComponent(username) + '&select=*');
-  return rows && rows[0] ? rows[0] : null;
-}
-async function dbGetAccountByEmail(email) {
-  var rows = await sbFetch('accounts?email=eq.' + encodeURIComponent(email) + '&select=*');
-  return rows && rows[0] ? rows[0] : null;
-}
-async function dbSaveAccount(username, passHash, email) {
-  await sbFetch('accounts', 'POST', { username: username, pass_hash: passHash, email: email });
-}
-async function dbGet(username, key, def) {
-  try {
-    var rows = await sbFetch('user_data?username=eq.' + encodeURIComponent(username) + '&key=eq.' + encodeURIComponent(key) + '&select=value');
-    if (rows && rows[0] && rows[0].value !== undefined) return rows[0].value;
-    return def;
-  } catch(e) {
-    console.error('[DB] GET error', key, e.message);
-    return def;
-  }
-}
-async function dbSet(username, key, value) {
-  // Gọi Supabase RPC function upsert_user_data - tránh lỗi 409 duplicate key
-  var res = await fetch(SUPABASE_URL + '/rest/v1/rpc/upsert_user_data', {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ p_username: username, p_key: key, p_value: value })
-  });
-  if (!res.ok) {
-    var err = await res.text();
-    throw new Error('dbSet RPC error ' + res.status + ': ' + err);
-  }
-}
 
 // ─── Session ──────────────────────────────────
 var SESSION_KEY = 'lu_session';
