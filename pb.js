@@ -83,3 +83,31 @@ async function dbSaveAccount(username, passHash, email) {
     });
 
 }
+// =============================
+// Đọc dữ liệu người dùng
+// =============================
+async function dbGet(username, key, defaultValue) {
+
+    try {
+
+        const list = await pb.collection(USER_DATA).getFullList({
+
+            filter: `username="${username}" && key="${key}"`
+
+        });
+
+        if (list.length === 0) {
+            return defaultValue;
+        }
+
+        return list[0].value;
+
+    } catch (err) {
+
+        console.error("dbGet:", err);
+
+        return defaultValue;
+
+    }
+
+}
