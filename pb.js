@@ -33,6 +33,50 @@ async function pbPing() {
 // =============================
 
 const USERS = "users";
+// =============================
+// Ghi dữ liệu người dùng
+// =============================
+async function dbSet(username, key, value) {
+
+    try {
+
+        const list = await pb.collection(USER_DATA).getFullList({
+
+            filter: `username="${username}" && key="${key}"`
+
+        });
+
+        if (list.length > 0) {
+
+            await pb.collection(USER_DATA).update(list[0].id, {
+
+                value: value
+
+            });
+
+        } else {
+
+            await pb.collection(USER_DATA).create({
+
+                username: username,
+
+                key: key,
+
+                value: value
+
+            });
+
+        }
+
+    } catch (err) {
+
+        console.error("dbSet:", err);
+
+        throw err;
+
+    }
+
+}
 
 const USER_DATA = "user_data";
 // =============================
