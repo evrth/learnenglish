@@ -184,24 +184,38 @@ async function bootApp() {
 
 // ─── LOAD / SAVE ──────────────────────────────
 async function loadAll() {
-  console.log('[ListenUp] loadAll →', currentUser);
-  var results = await Promise.all([
-    dbGet(currentUser,'lessons',[]),
-    dbGet(currentUser,'decks',[]),
-    dbGet(currentUser,'reviews',[]),
-    dbGet(currentUser,'progress',{})
-  ]);
-  lessons  = Array.isArray(results[0]) ? results[0] : [];
-  decks    = Array.isArray(results[1]) ? results[1] : [];
-  reviews  = Array.isArray(results[2]) ? results[2] : [];
-  progress = (results[3] && typeof results[3]==='object') ? results[3] : {};
+  console.log("[loadAll] currentUser =", currentUser);
+
+  const l = await dbGet(currentUser, "lessons", []);
+  console.log("LESSONS =", l);
+
+  const d = await dbGet(currentUser, "decks", []);
+  console.log("DECKS =", d);
+
+  const r = await dbGet(currentUser, "reviews", []);
+  console.log("REVIEWS =", r);
+
+  const p = await dbGet(currentUser, "progress", {});
+  console.log("PROGRESS =", p);
+
+  lessons = Array.isArray(l) ? l : [];
+  decks = Array.isArray(d) ? d : [];
+  reviews = Array.isArray(r) ? r : [];
+  progress = (p && typeof p === "object") ? p : {};
+
   if (!progress.listening) progress.listening = {};
   if (!progress.flashcard) progress.flashcard = {};
-  if (!progress.speaking)  progress.speaking  = {};
-  if (!progress.review)    progress.review    = {};
-  if (!progress.streak)    progress.streak    = {count:0,lastDate:null};
-  if (!progress.weak)      progress.weak      = {};
-  console.log('[ListenUp] loaded → lessons:'+lessons.length+' decks:'+decks.length+' reviews:'+reviews.length);
+  if (!progress.speaking) progress.speaking = {};
+  if (!progress.review) progress.review = {};
+  if (!progress.streak) progress.streak = { count: 0, lastDate: null };
+  if (!progress.weak) progress.weak = {};
+
+  console.log("[loadAll] DONE", {
+    lessons,
+    decks,
+    reviews,
+    progress
+  });
 }
 
 async function saveAll() {
