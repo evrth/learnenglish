@@ -65,8 +65,7 @@ async function doRegister() {
   try {
     if (await dbGetAccount(username)) return showAuthError('reg-error','Tên đăng nhập đã tồn tại!');
     if (await dbGetAccountByEmail(email)) return showAuthError('reg-error','Email này đã được dùng!');
-    var h = await hashPass(pass);
-    await dbSaveAccount(username, h, email);
+    await dbSaveAccount(username, pass, email);
     await dbSet(username,'lessons',[]);
     await dbSet(username,'decks',[]);
     await dbSet(username,'reviews',[]);
@@ -88,13 +87,20 @@ async function doLogin() {
   var btn = document.querySelector('#form-login .btn-auth');
   if (btn) { btn.disabled=true; btn.textContent='⏳ Đang đăng nhập...'; }
   try {
-    var account = await dbGetAccount(username);
-    if (!account) return showAuthError('login-error','Tên đăng nhập không tồn tại!');
-    var h = await hashPass(pass);
-    if (account.pass_hash !== h) return showAuthError('login-error','Sai mật khẩu!');
+    const account = await dbGetAccount(username);
+    if (!account){
+      return showAuthError('login-error','Tên đăng nhập không tồn tại!');
+    }
+    await pb.collection("users").authWithPassword(
+      account.email,
+      pass
+      );
     loginAs(username);
   } catch(e) {
-    showAuthError('login-error','Lỗi kết nối: ' + e.message);
+    showAuthError(
+      'login-error',
+      "Sai tài khoản hoặc mật khẩu!"
+    );
   } finally {
     if (btn) { btn.disabled=false; btn.textContent='Đăng nhập'; }
   }
