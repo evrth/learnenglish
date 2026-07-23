@@ -84,11 +84,15 @@ const USER_DATA = "user_data";
 // =============================
 async function dbGetAccount(username) {
 
+    console.log("Đang tìm username:", username);
+
     const list = await pb.collection(USERS).getFullList({
 
         filter: `username="${username}"`
 
     });
+
+    console.log("Kết quả PocketBase:", list);
 
     if (list.length === 0) return null;
 
