@@ -97,6 +97,7 @@ async function doLogin() {
       );
     loginAs(username);
   } catch(e) {
+    console.error("LOGIN ERROR:", e);
     showAuthError(
       'login-error',
       "Sai tài khoản hoặc mật khẩu!"
