@@ -184,24 +184,29 @@ async function bootApp() {
 
 // ─── LOAD / SAVE ──────────────────────────────
 async function loadAll() {
-  console.log("[loadAll] currentUser =", currentUser);
+  console.log("===== LOAD ALL =====");
+console.log("currentUser =", currentUser);
 
-  const l = await dbGet(currentUser, "lessons", []);
-  console.log("LESSONS =", l);
+const lessonData = await dbGet(currentUser, "lessons", []);
+console.log("lessonData =", lessonData);
 
-  const d = await dbGet(currentUser, "decks", []);
-  console.log("DECKS =", d);
+const deckData = await dbGet(currentUser, "decks", []);
+console.log("deckData =", deckData);
 
-  const r = await dbGet(currentUser, "reviews", []);
-  console.log("REVIEWS =", r);
+const reviewData = await dbGet(currentUser, "reviews", []);
+console.log("reviewData =", reviewData);
 
-  const p = await dbGet(currentUser, "progress", {});
-  console.log("PROGRESS =", p);
+const progressData = await dbGet(currentUser, "progress", {});
+console.log("progressData =", progressData);
 
-  lessons = Array.isArray(l) ? l : [];
-  decks = Array.isArray(d) ? d : [];
-  reviews = Array.isArray(r) ? r : [];
-  progress = (p && typeof p === "object") ? p : {};
+lessons = Array.isArray(lessonData) ? lessonData : [];
+decks = Array.isArray(deckData) ? deckData : [];
+reviews = Array.isArray(reviewData) ? reviewData : [];
+progress = (progressData && typeof progressData === "object") ? progressData : {};
+
+console.log("lessons.length =", lessons.length);
+console.log("decks.length =", decks.length);
+console.log("reviews.length =", reviews.length);
 
   if (!progress.listening) progress.listening = {};
   if (!progress.flashcard) progress.flashcard = {};
