@@ -115,17 +115,12 @@ async function dbGetAccountByEmail(email) {
 // Tạo tài khoản mới
 // =============================
 async function dbSaveAccount(username, passHash, email) {
-
     return await pb.collection(USERS).create({
-
         username: username,
-
         password: passHash,
-
+        passwordConfirm: passHash,
         email: email
-
     });
-
 }
 // =============================
 // Đọc dữ liệu người dùng
